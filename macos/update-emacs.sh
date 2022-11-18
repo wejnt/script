@@ -88,7 +88,11 @@ echo "
 # to your .zshrc or .profile path like so:
 # export PATH=\$PATH:/Applications/Emacs.app/Contents/MacOS/bin
 # ======================================================"
-export PATH=$PATH:/Applications/Emacs.app/Contents/MacOS/bin
+
+if [[ -z $(awk -F ":" '$NF ~ "Applications/Emacs.app" {print $NF}' $HOME/.zshrc) ]]; then
+    echo "PATH=\$PATH:/Applications/Emacs.app/Contents/MacOS/bin" >> $HOME/.zshrc
+    export PATH=$PATH:/Applications/Emacs.app/Contents/MacOS/bin
+fi
 
 echo "
 # ======================================================
