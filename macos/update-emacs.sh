@@ -1,8 +1,9 @@
 #!/bin/bash
+
+CMD_HOME=$(dirname $(readlink $0))
 BUILD_HOME=${HOME}/Sources/emacs
 
 BRANCH="$1"
-
 if [[ -d ${BUILD_HOME} ]]; then
     cd ${BUILD_HOME}
     # 判断是否是主分支并更新代码
@@ -50,19 +51,20 @@ fi
 NCPU=`expr $(getconf _NPROCESSORS_ONLN) + 1`
 make bootstrap -j$NCPU || exit 1 && make install -j$NCPU
 
-CMD=${BUILD_HOME}/nextstep/Emacs.app/Contents/MacOS/bin/emacs
-touch $CMD
+SERVER_CMD=${CMD_HOME}/emacs
+CLIENT_CMD=${CMD_HOME}/ec
 
-echo "#!/bin/bash
-/Applications/Emacs.app/Contents/MacOS/Emacs \"\$@\"" > $CMD
-chmod 755 $CMD
+cp -r ${SERVER_CMD} ${BUILD_HOME}/nextstep/Emacs.app/Contents/MacOS/bin/
+cp -r ${CLIENT_CMD} ${BUILD_HOME}/nextstep/Emacs.app/Contents/MacOS/bin/
+
+chmod 755 ${BUILD_HOME}/nextstep/Emacs.app/Contents/MacOS/bin/emacs
+chmod 755 ${BUILD_HOME}/nextstep/Emacs.app/Contents/MacOS/bin/ec
 
 # Copy C source files to Emacs
 cp -r ${BUILD_HOME}/src ${BUILD_HOME}/nextstep/Emacs.app/Contents/Resources/
 
 # 关闭Emacs App
 pkill -i emacs
-
 
 # 删除旧版本的app
 if [ -e /Applications/Emacs.app ]; then
@@ -86,18 +88,20 @@ echo "
 #
 # Be sure to add /Applications/Emacs.app/Contents/MacOS/bin
 # to your .zshrc or .profile path like so:
-# export PATH=\$PATH:/Applications/Emacs.app/Contents/MacOS/bin
+# export PATH=$PATH:/Applications/Emacs.app/Contents/MacOS/bin
 # ======================================================"
 
 if [[ -z $(awk -F ":" '$NF ~ "Applications/Emacs.app" {print $NF}' $HOME/.zshrc) ]]; then
     echo "PATH=\$PATH:/Applications/Emacs.app/Contents/MacOS/bin" >> $HOME/.zshrc
     export PATH=$PATH:/Applications/Emacs.app/Contents/MacOS/bin
+else
+    source $HOME/.zshrc
 fi
 
 echo "
 # ======================================================
-# Open new emacs
+# Open new emacs server by daemon
 # ======================================================"
-open /Applications/Emacs.app
+/Applications/Emacs.app/Contents/MacOS/bin/emacs --daemon
 
 echo "Build script finished!"
