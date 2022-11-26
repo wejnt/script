@@ -1,7 +1,7 @@
 #!/bin/bash
 
 CMD_HOME=$(dirname $(readlink $0))
-BUILD_HOME=${HOME}/Sources/emacs
+BUILD_HOME=${HOME}/tmp/emacs
 
 BRANCH="$1"
 if [[ -d ${BUILD_HOME} ]]; then
@@ -24,7 +24,7 @@ if [[ -d ${BUILD_HOME} ]]; then
     ./autogen.sh
 else
     # Clone Emacs仓库
-    git clone --depth=1 git://git.sv.gnu.org/emacs.git ${BUILD_HOME} || exit 1
+    git clone git://git.sv.gnu.org/emacs.git ${BUILD_HOME} || exit 1
     cd $BUILD_HOME || exit 1 && ./autogen.sh
 fi
 
@@ -88,7 +88,7 @@ echo "
 #
 # Be sure to add /Applications/Emacs.app/Contents/MacOS/bin
 # to your .zshrc or .profile path like so:
-# export PATH=$PATH:/Applications/Emacs.app/Contents/MacOS/bin
+# export PATH=\$PATH:/Applications/Emacs.app/Contents/MacOS/bin
 # ======================================================"
 
 if [[ -z $(awk -F ":" '$NF ~ "Applications/Emacs.app" {print $NF}' $HOME/.zshrc) ]]; then
